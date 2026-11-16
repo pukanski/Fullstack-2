@@ -132,6 +132,11 @@ docker compose exec backend npm run seed
 
 O seed cria usuários de demonstração e lançamentos de 3 meses, incluindo compras parceladas
 
+| Usuário | Email | Senha |
+|---|---|---|
+| Ana Demonstração | ana.demo@financas.com | Demo1234 |
+| Bruno Demonstração | bruno.demo@financas.com | Demo1234 |
+
 ### Comandos do dcoker
 
 | O que fazer | Comando |
