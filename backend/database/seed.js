@@ -2,26 +2,12 @@ import bcrypt from 'bcrypt';
 import 'dotenv/config';
 import { randomUUID } from 'node:crypto';
 import { pool } from '../src/config/db.js';
+import { CATEGORIAS_PADRAO, CONTA_CORRENTE } from '../src/models/padroes.js';
 
 const SENHA_DEMO = 'Demo1234';
 
 const hoje = new Date();
 const hojeISO = hoje.toISOString().slice(0, 10);
-
-const CATEGORIAS_PADRAO = [
-    { nome: 'Salário', tipo: 'entrada' },
-    { nome: 'Outros', tipo: 'entrada' },
-    { nome: 'Alimentação', tipo: 'saida' },
-    { nome: 'Moradia', tipo: 'saida' },
-    { nome: 'Saúde', tipo: 'saida' },
-    { nome: 'Mobilidade', tipo: 'saida' },
-    { nome: 'Lazer', tipo: 'saida' },
-    { nome: 'Educação', tipo: 'saida' },
-    { nome: 'Outros', tipo: 'saida' },
-];
-
-const CONTA_CORRENTE = { nome: 'Conta corrente', tipo: 'conta' };
-
 
 const MESES = [-3, -2, -1, 0];
 
