@@ -34,6 +34,7 @@ projeto2-financas/
 ├── docker-compose.yml          - sobe banco, back-end e front-end
 ├── backend/
 │   ├── Dockerfile
+│   ├── .dockerignore
 │   ├── package.json
 │   ├── .env.example            - modelo das variáveis de ambiente
 │   ├── database/               - schema.sql (criação das tabelas) e seed
@@ -44,13 +45,13 @@ projeto2-financas/
 │       ├── middlewares/        - autenticação JWT, validação, tratamento de erros
 │       └── config/             - pool de conexão do banco e configurações do JWT
 ├── frontend/
-├── Dockerfile
+│   ├── Dockerfile
 │   ├── package.json
+│   ├── .dockerignore
 │   └── src/
 │       ├── components/         - componentes e páginas
 │       ├── contexts/           - AuthContext e demais contextos
 │       └── services/           - cliente HTTP (único ponto de acesso à API)
-├── .dockerignore
 └── README.md
 ```
 
