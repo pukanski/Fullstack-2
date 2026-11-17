@@ -51,7 +51,9 @@ projeto2-financas/
 │   └── src/
 │       ├── components/         - componentes e páginas
 │       ├── contexts/           - AuthContext e demais contextos
-│       └── services/           - cliente HTTP (único ponto de acesso à API)
+│       ├── hooks/              - hooks reutilizáveis (ex.: estado e validação de formulários)
+│       ├── services/           - cliente HTTP (único ponto de acesso à API)
+│       └── utils/              - funções puras do front (validações, máscara de CPF)
 └── README.md
 ```
 
@@ -186,6 +188,7 @@ Formato único de erro, usado por todas as rotas:
   - editar ou excluir uma parcela não exige recalcular nada;
   - a regra fica em uma função pura, testável com os exemplos do enunciado;
   - o modelo de dados fica mais simples.
+  - Autenticação no front-end: todas as chamadas passam por `services/api.js` (axios), que envia o token sozinho e, em um 401 de requisição autenticada, encerra a sessão e volta para o login. O token e o usuário ficam no `AuthContext` e no localStorage, para o login sobreviver a um recarregamento. As telas internas ficam dentro de `RotaProtegida`. Os formulários repetem as validações do back-end para mostrar o erro antes do envio, e os erros devolvidos pela API (`campos`) aparecem junto do campo certo.
 
 
 ## Segurança
@@ -200,6 +203,7 @@ Formato único de erro, usado por todas as rotas:
 ## Testes
 
 - Função de cálculo de fatura: docker compose exec backend npm test.
+- Validações e máscara de CPF do front-end: docker compose exec frontend npm test.
 - Coleção de requisições do Postman/Insomnia, cobrindo cadastro duplicado (e-mail e CPF), requisição sem token, token inválido e acesso a dados de outro usuário.
 
 ## Equipe
