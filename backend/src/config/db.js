@@ -3,6 +3,10 @@ import pg from 'pg';
 
 const { Pool } = pg;
 
+pg.types.setTypeParser(1082, (valor) => valor);
+pg.types.setTypeParser(1700, (valor) => Number(valor));
+pg.types.setTypeParser(20, (valor) => Number(valor));
+
 export const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     max: 10,
