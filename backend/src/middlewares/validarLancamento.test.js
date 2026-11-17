@@ -82,3 +82,9 @@ test('campos extras, como usuarioId, são descartados', () => {
     assert.equal('usuarioId' in resultado.data, false);
     assert.equal('id' in resultado.data, false);
 });
+
+test('valor pequeno demais para o número de parcelas é reprovado', () => {
+    assert.deepEqual(camposComErro({ ...valido, valor: 0.05, parcelas: 10 }), ['parcelas']);
+    const resultado = esquemaLancamento.safeParse({ ...valido, valor: 0.1, parcelas: 10 });
+    assert.equal(resultado.success, true); // 10 centavos em 10 parcelas: 1 centavo cada
+});

@@ -50,6 +50,10 @@ export const esquemaLancamento = z
             )
             .optional(),
     })
+    .refine((dados) => typeof dados.valor !== 'number' || dados.valor < 0.01 || Math.round(dados.valor * 100) >= (dados.parcelas ?? 1), {
+        error: 'O valor é pequeno demais para este número de parcelas.',
+        path: ['parcelas'],
+    })
     .transform((dados) => ({ ...dados, parcelas: dados.parcelas ?? 1 }));
 
 export function validarLancamento(req, res, next) {

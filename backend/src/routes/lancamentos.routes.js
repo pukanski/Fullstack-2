@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { autenticar } from '../middlewares/autenticar.js';
 import { ErroHttp } from '../middlewares/erros.js';
 import { validarLancamento } from '../middlewares/validarLancamento.js';
-import { buscarReferencias, criarLancamento } from '../models/lancamento.js';
+import { buscarReferencias, criarLancamentos } from '../models/lancamento.js';
 
 const router = Router();
 
@@ -29,15 +29,25 @@ router.post('/', validarLancamento, async (req, res) => {
         });
     }
 
-    // esse aqui é temporario, o parcelamento entra na issue #18. Até lá, recusa em vez de gravar errado.
     if (dados.parcelas > 1) {
-        throw new ErroHttp(400, 'Dados inválidos.', {
-            parcelas: 'Compras parceladas ainda não estão disponíveis.',
-        });
+        if (dados.tipo !== 'saida') {
+            throw new ErroHttp(400, 'Dados inválidos.', { parcelas: 'Só saídas podem ser parceladas.' });
+        }
+        if (fonte.tipo !== 'cartao_credito') {
+            throw new ErroHttp(400, 'Dados inválidos.', { parcelas: 'Só compras no cartão de crédito podem ser parceladas.' });
+        }
     }
 
-    const lancamento = await criarLancamento(req.usuarioId, dados);
-    return res.status(201).json(lancamento);
+    const criados = await criarLancamentos(req.usuarioId, dados);
+    const [primeira] = criados;
+
+    if (criados.length === 1) {
+        return res.status(201).json(primeira);
+    }
+    return res.status(201).json({
+        ...primeira,
+        parcelasCriadas: criados.map(({ id, parcelaAtual, valor }) => ({ id, parcelaAtual, valor })),
+    });
 });
 
 export default router;

@@ -1,4 +1,6 @@
+import { randomUUID } from 'node:crypto';
 import { pool } from '../config/db.js';
+import { dividirEmCentavos } from './parcelamento.js';
 
 export const COLUNAS_LANCAMENTO = `id, tipo, descricao, valor, data,
   categoria_id AS "categoriaId", fonte_destino_id AS "fonteDestinoId",
@@ -13,12 +15,36 @@ export async function buscarReferencias(usuarioId, categoriaId, fonteDestinoId) 
     return { categoria: categorias.rows[0] ?? null, fonte: fontes.rows[0] ?? null };
 }
 
-export async function criarLancamento(usuarioId, dados) {
-    const { rows } = await pool.query(
-        `INSERT INTO lancamentos (usuario_id, tipo, descricao, valor, data, categoria_id, fonte_destino_id)
-     VALUES ($1, $2, $3, $4, $5, $6, $7)
-     RETURNING ${COLUNAS_LANCAMENTO}`,
-        [usuarioId, dados.tipo, dados.descricao, dados.valor, dados.data, dados.categoriaId, dados.fonteDestinoId],
-    );
-    return rows[0];
+export async function criarLancamentos(usuarioId, dados) {
+    const valores = dividirEmCentavos(dados.valor, dados.parcelas);
+    const grupo = dados.parcelas > 1 ? randomUUID() : null;
+
+    const cliente = await pool.connect();
+    try {
+        await cliente.query('BEGIN');
+
+        const criados = [];
+        for (let indice = 0; indice < dados.parcelas; indice++) {
+            const { rows } = await cliente.query(
+                `INSERT INTO lancamentos
+           (usuario_id, tipo, descricao, valor, data, categoria_id, fonte_destino_id,
+            parcela_atual, total_parcelas, grupo_parcelamento)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+         RETURNING ${COLUNAS_LANCAMENTO}`,
+                [
+                    usuarioId, dados.tipo, dados.descricao, valores[indice], dados.data,
+                    dados.categoriaId, dados.fonteDestinoId, indice + 1, dados.parcelas, grupo,
+                ],
+            );
+            criados.push(rows[0]);
+        }
+
+        await cliente.query('COMMIT');
+        return criados;
+    } catch (erro) {
+        await cliente.query('ROLLBACK');
+        throw erro;
+    } finally {
+        cliente.release();
+    }
 }
