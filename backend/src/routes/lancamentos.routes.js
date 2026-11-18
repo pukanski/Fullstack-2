@@ -1,8 +1,9 @@
 import { Router } from 'express';
 import { autenticar } from '../middlewares/autenticar.js';
 import { ErroHttp } from '../middlewares/erros.js';
+import { validarFiltrosLancamentos } from '../middlewares/validarFiltrosLancamentos.js';
 import { validarLancamento } from '../middlewares/validarLancamento.js';
-import { buscarReferencias, criarLancamentos } from '../models/lancamento.js';
+import { buscarReferencias, criarLancamentos, listarLancamentos } from '../models/lancamento.js';
 
 const router = Router();
 
@@ -48,6 +49,11 @@ router.post('/', validarLancamento, async (req, res) => {
         ...primeira,
         parcelasCriadas: criados.map(({ id, parcelaAtual, valor }) => ({ id, parcelaAtual, valor })),
     });
+});
+
+router.get('/', validarFiltrosLancamentos, async (req, res) => {
+    const resultado = await listarLancamentos(req.usuarioId, req.filtros);
+    return res.json(resultado);
 });
 
 export default router;

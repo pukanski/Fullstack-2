@@ -1,6 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import { pool } from '../config/db.js';
+import { montarWhere } from './filtros.js';
 import { dividirEmCentavos } from './parcelamento.js';
+
+export const ITENS_POR_PAGINA = 20;
 
 export const COLUNAS_LANCAMENTO = `id, tipo, descricao, valor, data,
   categoria_id AS "categoriaId", fonte_destino_id AS "fonteDestinoId",
@@ -47,4 +50,52 @@ export async function criarLancamentos(usuarioId, dados) {
     } finally {
         cliente.release();
     }
+}
+
+const COLUNAS_LISTAGEM = `l.id, l.tipo, l.descricao, l.valor, l.data,
+  l.categoria_id AS "categoriaId", c.nome AS "categoriaNome",
+  l.fonte_destino_id AS "fonteDestinoId", f.nome AS "fonteDestinoNome",
+  l.parcela_atual AS "parcelaAtual", l.total_parcelas AS "totalParcelas",
+  l.grupo_parcelamento AS "grupoParcelamento"`;
+
+export async function listarLancamentos(usuarioId, filtros) {
+    const { where, parametros } = montarWhere(usuarioId, filtros);
+    const deslocamento = (filtros.pagina - 1) * ITENS_POR_PAGINA;
+
+    const [resumo, pagina] = await Promise.all([
+        pool.query(
+            `SELECT
+         COALESCE(SUM(CASE WHEN l.tipo = 'entrada' THEN l.valor END), 0) AS entradas,
+         COALESCE(SUM(CASE WHEN l.tipo = 'saida' THEN l.valor END), 0) AS saidas,
+         COALESCE(SUM(CASE WHEN l.tipo = 'entrada' THEN l.valor ELSE -l.valor END), 0) AS saldo,
+         COUNT(*) AS total
+       FROM lancamentos l
+       WHERE ${where}`,
+            parametros,
+        ),
+        pool.query(
+            `SELECT ${COLUNAS_LISTAGEM}
+       FROM lancamentos l
+       JOIN categorias c ON c.id = l.categoria_id
+       JOIN fontes_destinos f ON f.id = l.fonte_destino_id
+       WHERE ${where}
+       ORDER BY l.data DESC, l.id DESC
+       LIMIT $${parametros.length + 1} OFFSET $${parametros.length + 2}`,
+            [...parametros, ITENS_POR_PAGINA, deslocamento],
+        ),
+    ]);
+
+    const { entradas, saidas, saldo, total } = resumo.rows[0];
+
+    return {
+        periodo: { inicio: filtros.inicio, fim: filtros.fim },
+        totais: { entradas, saidas, saldo },
+        paginacao: {
+            pagina: filtros.pagina,
+            porPagina: ITENS_POR_PAGINA,
+            totalItens: total,
+            totalPaginas: Math.max(1, Math.ceil(total / ITENS_POR_PAGINA)),
+        },
+        lancamentos: pagina.rows,
+    };
 }
