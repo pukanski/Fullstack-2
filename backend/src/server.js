@@ -4,6 +4,7 @@ import { corsRestrito } from './middlewares/cors.js';
 import { rotaNaoEncontrada, tratarErros } from './middlewares/erros.js';
 import authRouter from './routes/auth.routes.js';
 import lancamentosRouter from './routes/lancamentos.routes.js';
+import saudeFinanceiraRouter from './routes/saudeFinanceira.routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,6 +19,7 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api/auth', authRouter);
 app.use('/api/lancamentos', lancamentosRouter);
+app.use('/api/saude-financeira', saudeFinanceiraRouter);
 
 app.use(rotaNaoEncontrada);
 app.use(tratarErros);

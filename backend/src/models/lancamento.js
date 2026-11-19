@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { pool } from '../config/db.js';
 import { montarWhere } from './filtros.js';
+import { deslocarMes, ultimoDiaDoMes } from './meses.js';
 import { dividirEmCentavos } from './parcelamento.js';
 
 export const ITENS_POR_PAGINA = 20;
@@ -98,4 +99,25 @@ export async function listarLancamentos(usuarioId, filtros) {
         },
         lancamentos: pagina.rows,
     };
+}
+
+export async function lancamentosParaAnalise(usuarioId, mesAtual) {
+    const inicioDaJanela = `${deslocarMes(mesAtual, -3)}-01`;
+    const fimDoMesAtual = `${mesAtual}-${String(ultimoDiaDoMes(mesAtual)).padStart(2, '0')}`;
+    const inicioDoCartao = `${deslocarMes(mesAtual, -51)}-01`;
+
+    const { rows } = await pool.query(
+        `SELECT l.tipo, l.valor, l.data,
+            l.parcela_atual AS "parcelaAtual", l.total_parcelas AS "totalParcelas",
+            l.categoria_id AS "categoriaId", c.nome AS "categoriaNome",
+            f.tipo AS "fonteTipo", f.dia_fechamento AS "diaFechamento", f.dia_vencimento AS "diaVencimento"
+     FROM lancamentos l
+     JOIN categorias c ON c.id = l.categoria_id
+     JOIN fontes_destinos f ON f.id = l.fonte_destino_id
+     WHERE l.usuario_id = $1
+       AND (   (f.tipo <> 'cartao_credito' AND l.data BETWEEN $2 AND $3)
+            OR (f.tipo = 'cartao_credito' AND l.data >= $4))`,
+        [usuarioId, inicioDaJanela, fimDoMesAtual, inicioDoCartao],
+    );
+    return rows;
 }
