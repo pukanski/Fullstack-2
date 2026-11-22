@@ -1,0 +1,1364 @@
+{
+    "_type": "export",
+    "__export_format": 4,
+    "__export_date": "2026-11-22T19:15:00.000Z",
+    "__export_source": "insomnia.desktop.app:v10.0.0",
+    "resources": [
+        {
+            "_id": "wrk_fullstack2_financas",
+            "parentId": null,
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "name": "Fullstack 2 — Controle Financeiro",
+            "description": "Coleção de testes da API: autenticação, validações, segurança/isolamento, CRUDs, relatórios e saúde financeira.",
+            "scope": "collection",
+            "_type": "workspace"
+        },
+        {
+            "_id": "env_base_financas",
+            "parentId": "wrk_fullstack2_financas",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "name": "Base Environment",
+            "data": {
+                "token_ana": "",
+                "token_bruno": "",
+                "categoria_ana_id": "",
+                "fonte_ana_id": "",
+                "cartao_ana_id": "",
+                "lancamento_ana_id": "",
+                "lancamento_parcelado_id": ""
+            },
+            "dataPropertyOrder": {
+                "&": [
+                    "token_ana",
+                    "token_bruno",
+                    "categoria_ana_id",
+                    "fonte_ana_id",
+                    "cartao_ana_id",
+                    "lancamento_ana_id",
+                    "lancamento_parcelado_id"
+                ]
+            },
+            "color": "#1B5E20",
+            "isPrivate": false,
+            "metaSortKey": 1763836620000,
+            "_type": "environment"
+        },
+        {
+            "_id": "fld_health",
+            "parentId": "wrk_fullstack2_financas",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "name": "Saúde da API",
+            "description": "",
+            "environment": {},
+            "environmentPropertyOrder": null,
+            "metaSortKey": 100,
+            "_type": "request_group"
+        },
+        {
+            "_id": "req_health",
+            "parentId": "fld_health",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/health",
+            "name": "GET Health Check (200)",
+            "description": "Verifica se a API está online. Esperado: 200 {\"status\":\"ok\"}.",
+            "method": "GET",
+            "body": {},
+            "parameters": [],
+            "headers": [],
+            "authentication": {},
+            "metaSortKey": 200,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "fld_auth",
+            "parentId": "wrk_fullstack2_financas",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "name": "Autenticação",
+            "description": "",
+            "environment": {},
+            "environmentPropertyOrder": null,
+            "metaSortKey": 300,
+            "_type": "request_group"
+        },
+        {
+            "_id": "req_auth_cadastro_ok",
+            "parentId": "fld_auth",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/auth/cadastro",
+            "name": "POST Cadastro válido (201)",
+            "description": "Cria um novo usuário válido. Esperado: 201 Created.",
+            "method": "POST",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"nome\": \"Carlos Teste\",\n  \"email\": \"carlos.teste@financas.com\",\n  \"cpf\": \"39053344705\",\n  \"senha\": \"Senha123\",\n  \"confirmacaoSenha\": \"Senha123\"\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {},
+            "metaSortKey": 400,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_auth_cadastro_email_dup",
+            "parentId": "fld_auth",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/auth/cadastro",
+            "name": "POST Cadastro — E-mail duplicado (409)",
+            "description": "Testa unicidade de e-mail (requer seed executado). Esperado: 409 Conflict com erro em campos.email.",
+            "method": "POST",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"nome\": \"Duplicado Email\",\n  \"email\": \"ana.demo@financas.com\",\n  \"cpf\": \"41234567822\",\n  \"senha\": \"Senha123\",\n  \"confirmacaoSenha\": \"Senha123\"\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {},
+            "metaSortKey": 500,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_auth_cadastro_cpf_dup",
+            "parentId": "fld_auth",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/auth/cadastro",
+            "name": "POST Cadastro — CPF duplicado (409)",
+            "description": "Testa unicidade de CPF (CPF da Ana Demo). Esperado: 409 Conflict com erro em campos.cpf.",
+            "method": "POST",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"nome\": \"Duplicado CPF\",\n  \"email\": \"outro.email@financas.com\",\n  \"cpf\": \"52998224725\",\n  \"senha\": \"Senha123\",\n  \"confirmacaoSenha\": \"Senha123\"\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {},
+            "metaSortKey": 600,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_auth_cadastro_invalido",
+            "parentId": "fld_auth",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/auth/cadastro",
+            "name": "POST Cadastro — Dados inválidos (400)",
+            "description": "Validações de nome, e-mail, CPF, senha e confirmação. Esperado: 400 Bad Request.",
+            "method": "POST",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"nome\": \"A\",\n  \"email\": \"email-invalido\",\n  \"cpf\": \"111.111.111-11\",\n  \"senha\": \"123\",\n  \"confirmacaoSenha\": \"456\"\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {},
+            "metaSortKey": 700,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_auth_login_ana",
+            "parentId": "fld_auth",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/auth/login",
+            "name": "POST Login — Ana Demo (200)",
+            "description": "Autentica Ana Demo e salva o token automaticamente em token_ana.",
+            "method": "POST",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"email\": \"ana.demo@financas.com\",\n  \"senha\": \"Demo1234\"\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {},
+            "metaSortKey": 800,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request",
+            "afterResponseScript": "const data = insomnia.response.json();\nif (data && data.token !== undefined) {\n  insomnia.environment.set('token_ana', String(data.token));\n}"
+        },
+        {
+            "_id": "req_auth_login_bruno",
+            "parentId": "fld_auth",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/auth/login",
+            "name": "POST Login — Bruno Demo (200)",
+            "description": "Autentica Bruno Demo e salva o token automaticamente em token_bruno.",
+            "method": "POST",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"email\": \"bruno.demo@financas.com\",\n  \"senha\": \"Demo1234\"\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {},
+            "metaSortKey": 900,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request",
+            "afterResponseScript": "const data = insomnia.response.json();\nif (data && data.token !== undefined) {\n  insomnia.environment.set('token_bruno', String(data.token));\n}"
+        },
+        {
+            "_id": "req_auth_login_senha_errada",
+            "parentId": "fld_auth",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/auth/login",
+            "name": "POST Login — Senha errada (401)",
+            "description": "Esperado: 401 Unauthorized.",
+            "method": "POST",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"email\": \"ana.demo@financas.com\",\n  \"senha\": \"Errada123\"\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {},
+            "metaSortKey": 1000,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_auth_login_inexistente",
+            "parentId": "fld_auth",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/auth/login",
+            "name": "POST Login — E-mail inexistente (401)",
+            "description": "Esperado: 401 Unauthorized (verifica também uso de HASH_FALSO sem erro 500).",
+            "method": "POST",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"email\": \"naoexiste@financas.com\",\n  \"senha\": \"Demo1234\"\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {},
+            "metaSortKey": 1100,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_auth_me",
+            "parentId": "fld_auth",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/auth/me",
+            "name": "GET Usuário logado — Ana (200)",
+            "description": "Retorna dados da Ana sem senha_hash. Esperado: 200 OK.",
+            "method": "GET",
+            "body": {},
+            "parameters": [],
+            "headers": [],
+            "authentication": {
+                "type": "bearer",
+                "token": "{{ _.token_ana }}"
+            },
+            "metaSortKey": 1200,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "fld_sec",
+            "parentId": "wrk_fullstack2_financas",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "name": "Segurança e Isolamento",
+            "description": "",
+            "environment": {},
+            "environmentPropertyOrder": null,
+            "metaSortKey": 1300,
+            "_type": "request_group"
+        },
+        {
+            "_id": "req_sec_sem_token_me",
+            "parentId": "fld_sec",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/auth/me",
+            "name": "GET /auth/me — Sem token (401)",
+            "description": "Requisição protegida sem header Authorization. Esperado: 401 Unauthorized.",
+            "method": "GET",
+            "body": {},
+            "parameters": [],
+            "headers": [],
+            "authentication": {},
+            "metaSortKey": 1400,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_sec_sem_token_cat",
+            "parentId": "fld_sec",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/categorias",
+            "name": "GET /categorias — Sem token (401)",
+            "description": "Requisição protegida sem token. Esperado: 401 Unauthorized.",
+            "method": "GET",
+            "body": {},
+            "parameters": [],
+            "headers": [],
+            "authentication": {},
+            "metaSortKey": 1500,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_sec_token_invalido",
+            "parentId": "fld_sec",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/categorias",
+            "name": "GET /categorias — Token inválido (401)",
+            "description": "Requisição com JWT inválido/adulterado. Esperado: 401 Unauthorized.",
+            "method": "GET",
+            "body": {},
+            "parameters": [],
+            "headers": [],
+            "authentication": {
+                "type": "bearer",
+                "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.token.invalido"
+            },
+            "metaSortKey": 1600,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_sec_isolamento_get_lanc",
+            "parentId": "fld_sec",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/lancamentos/{{ _.lancamento_ana_id }}",
+            "name": "GET Lançamento da Ana usando token do Bruno (404)",
+            "description": "Bruno tenta ler um lançamento criado pela Ana. Esperado: 404 Not Found.",
+            "method": "GET",
+            "body": {},
+            "parameters": [],
+            "headers": [],
+            "authentication": {
+                "type": "bearer",
+                "token": "{{ _.token_bruno }}"
+            },
+            "metaSortKey": 1700,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_sec_isolamento_put_cat",
+            "parentId": "fld_sec",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/categorias/{{ _.categoria_ana_id }}",
+            "name": "PUT Categoria da Ana usando token do Bruno (404)",
+            "description": "Bruno tenta editar uma categoria da Ana. Esperado: 404 Not Found.",
+            "method": "PUT",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"nome\": \"Invasão\",\n  \"tipo\": \"saida\"\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {
+                "type": "bearer",
+                "token": "{{ _.token_bruno }}"
+            },
+            "metaSortKey": 1800,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_sec_isolamento_del_lanc",
+            "parentId": "fld_sec",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/lancamentos/{{ _.lancamento_ana_id }}",
+            "name": "DELETE Lançamento da Ana usando token do Bruno (404)",
+            "description": "Bruno tenta excluir um lançamento da Ana. Esperado: 404 Not Found.",
+            "method": "DELETE",
+            "body": {},
+            "parameters": [],
+            "headers": [],
+            "authentication": {
+                "type": "bearer",
+                "token": "{{ _.token_bruno }}"
+            },
+            "metaSortKey": 1900,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "fld_cat",
+            "parentId": "wrk_fullstack2_financas",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "name": "Categorias",
+            "description": "",
+            "environment": {},
+            "environmentPropertyOrder": null,
+            "metaSortKey": 2000,
+            "_type": "request_group"
+        },
+        {
+            "_id": "req_cat_listar",
+            "parentId": "fld_cat",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/categorias",
+            "name": "GET Listar categorias (200)",
+            "description": "",
+            "method": "GET",
+            "body": {},
+            "parameters": [],
+            "headers": [],
+            "authentication": {
+                "type": "bearer",
+                "token": "{{ _.token_ana }}"
+            },
+            "metaSortKey": 2100,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_cat_criar",
+            "parentId": "fld_cat",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/categorias",
+            "name": "POST Criar categoria (201)",
+            "description": "Cria categoria e salva o ID automaticamente em categoria_ana_id.",
+            "method": "POST",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"nome\": \"Pets\",\n  \"tipo\": \"saida\"\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {
+                "type": "bearer",
+                "token": "{{ _.token_ana }}"
+            },
+            "metaSortKey": 2200,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request",
+            "afterResponseScript": "const data = insomnia.response.json();\nif (data && data.id !== undefined) {\n  insomnia.environment.set('categoria_ana_id', String(data.id));\n}"
+        },
+        {
+            "_id": "req_cat_duplicada",
+            "parentId": "fld_cat",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/categorias",
+            "name": "POST Criar categoria duplicada (409)",
+            "description": "Esperado: 409 Conflict.",
+            "method": "POST",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"nome\": \"Pets\",\n  \"tipo\": \"saida\"\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {
+                "type": "bearer",
+                "token": "{{ _.token_ana }}"
+            },
+            "metaSortKey": 2300,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_cat_invalida",
+            "parentId": "fld_cat",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/categorias",
+            "name": "POST Criar categoria sem tipo (400)",
+            "description": "Esperado: 400 Bad Request com erro em campos.tipo.",
+            "method": "POST",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"nome\": \"Sem Tipo\"\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {
+                "type": "bearer",
+                "token": "{{ _.token_ana }}"
+            },
+            "metaSortKey": 2400,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_cat_editar",
+            "parentId": "fld_cat",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/categorias/{{ _.categoria_ana_id }}",
+            "name": "PUT Editar categoria (200)",
+            "description": "",
+            "method": "PUT",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"nome\": \"Animais de Estimação\",\n  \"tipo\": \"saida\"\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {
+                "type": "bearer",
+                "token": "{{ _.token_ana }}"
+            },
+            "metaSortKey": 2500,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_cat_excluir",
+            "parentId": "fld_cat",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/categorias/{{ _.categoria_ana_id }}",
+            "name": "DELETE Excluir categoria (204)",
+            "description": "",
+            "method": "DELETE",
+            "body": {},
+            "parameters": [],
+            "headers": [],
+            "authentication": {
+                "type": "bearer",
+                "token": "{{ _.token_ana }}"
+            },
+            "metaSortKey": 2600,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "fld_fontes",
+            "parentId": "wrk_fullstack2_financas",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "name": "Fontes e Destinos",
+            "description": "",
+            "environment": {},
+            "environmentPropertyOrder": null,
+            "metaSortKey": 2700,
+            "_type": "request_group"
+        },
+        {
+            "_id": "req_fonte_listar",
+            "parentId": "fld_fontes",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/fontes-destinos",
+            "name": "GET Listar fontes/destinos (200)",
+            "description": "",
+            "method": "GET",
+            "body": {},
+            "parameters": [],
+            "headers": [],
+            "authentication": {
+                "type": "bearer",
+                "token": "{{ _.token_ana }}"
+            },
+            "metaSortKey": 2800,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_fonte_criar_conta",
+            "parentId": "fld_fontes",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/fontes-destinos",
+            "name": "POST Criar conta (201)",
+            "description": "",
+            "method": "POST",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"nome\": \"Carteira Teste\",\n  \"tipo\": \"conta\"\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {
+                "type": "bearer",
+                "token": "{{ _.token_ana }}"
+            },
+            "metaSortKey": 2900,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request",
+            "afterResponseScript": "const data = insomnia.response.json();\nif (data && data.id !== undefined) {\n  insomnia.environment.set('fonte_ana_id', String(data.id));\n}"
+        },
+        {
+            "_id": "req_fonte_criar_cartao",
+            "parentId": "fld_fontes",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/fontes-destinos",
+            "name": "POST Criar cartão de crédito (201)",
+            "description": "",
+            "method": "POST",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"nome\": \"Cartão Teste\",\n  \"tipo\": \"cartao_credito\",\n  \"diaFechamento\": 10,\n  \"diaVencimento\": 17,\n  \"limite\": 5000\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {
+                "type": "bearer",
+                "token": "{{ _.token_ana }}"
+            },
+            "metaSortKey": 3000,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request",
+            "afterResponseScript": "const data = insomnia.response.json();\nif (data && data.id !== undefined) {\n  insomnia.environment.set('cartao_ana_id', String(data.id));\n}"
+        },
+        {
+            "_id": "req_fonte_cartao_invalido",
+            "parentId": "fld_fontes",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/fontes-destinos",
+            "name": "POST Cartão sem dados obrigatórios (400)",
+            "description": "Esperado: 400 Bad Request exigindo diaFechamento, diaVencimento e limite.",
+            "method": "POST",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"nome\": \"Cartão Incompleto\",\n  \"tipo\": \"cartao_credito\"\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {
+                "type": "bearer",
+                "token": "{{ _.token_ana }}"
+            },
+            "metaSortKey": 3100,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_fonte_editar",
+            "parentId": "fld_fontes",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/fontes-destinos/{{ _.fonte_ana_id }}",
+            "name": "PUT Editar conta (200)",
+            "description": "",
+            "method": "PUT",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"nome\": \"Carteira Atualizada\",\n  \"tipo\": \"conta\"\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {
+                "type": "bearer",
+                "token": "{{ _.token_ana }}"
+            },
+            "metaSortKey": 3200,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_fonte_excluir",
+            "parentId": "fld_fontes",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/fontes-destinos/{{ _.fonte_ana_id }}",
+            "name": "DELETE Excluir conta (204)",
+            "description": "",
+            "method": "DELETE",
+            "body": {},
+            "parameters": [],
+            "headers": [],
+            "authentication": {
+                "type": "bearer",
+                "token": "{{ _.token_ana }}"
+            },
+            "metaSortKey": 3300,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "fld_lanc",
+            "parentId": "wrk_fullstack2_financas",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "name": "Lançamentos",
+            "description": "",
+            "environment": {},
+            "environmentPropertyOrder": null,
+            "metaSortKey": 3400,
+            "_type": "request_group"
+        },
+        {
+            "_id": "req_lanc_listar",
+            "parentId": "fld_lanc",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/lancamentos",
+            "name": "GET Listar lançamentos — mês corrente (200)",
+            "description": "",
+            "method": "GET",
+            "body": {},
+            "parameters": [],
+            "headers": [],
+            "authentication": {
+                "type": "bearer",
+                "token": "{{ _.token_ana }}"
+            },
+            "metaSortKey": 3500,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_lanc_filtrar",
+            "parentId": "fld_lanc",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/lancamentos",
+            "name": "GET Listar lançamentos — com filtros (200)",
+            "description": "",
+            "method": "GET",
+            "body": {},
+            "parameters": [
+                {
+                    "name": "inicio",
+                    "value": "2026-08-01",
+                    "disabled": false
+                },
+                {
+                    "name": "fim",
+                    "value": "2026-11-30",
+                    "disabled": false
+                },
+                {
+                    "name": "tipo",
+                    "value": "saida",
+                    "disabled": false
+                },
+                {
+                    "name": "pagina",
+                    "value": "1",
+                    "disabled": false
+                }
+            ],
+            "headers": [],
+            "authentication": {
+                "type": "bearer",
+                "token": "{{ _.token_ana }}"
+            },
+            "metaSortKey": 3600,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_lanc_criar_avista",
+            "parentId": "fld_lanc",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/lancamentos",
+            "name": "POST Criar lançamento à vista (201)",
+            "description": "Execute 'Criar categoria' e 'Criar conta' antes para preencher os IDs automaticamente.",
+            "method": "POST",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"tipo\": \"saida\",\n  \"descricao\": \"Ração do cachorro\",\n  \"valor\": 120.5,\n  \"data\": \"2026-11-22\",\n  \"categoriaId\": \"{{ _.categoria_ana_id }}\",\n  \"fonteDestinoId\": \"{{ _.fonte_ana_id }}\"\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {
+                "type": "bearer",
+                "token": "{{ _.token_ana }}"
+            },
+            "metaSortKey": 3700,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request",
+            "afterResponseScript": "const data = insomnia.response.json();\nif (data && data.id !== undefined) {\n  insomnia.environment.set('lancamento_ana_id', String(data.id));\n}"
+        },
+        {
+            "_id": "req_lanc_criar_parcelado",
+            "parentId": "fld_lanc",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/lancamentos",
+            "name": "POST Criar lançamento parcelado 3x no cartão (201)",
+            "description": "Divide R$ 100,00 em 33,34 + 33,33 + 33,33 no cartão criado.",
+            "method": "POST",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"tipo\": \"saida\",\n  \"descricao\": \"Compra Teste 3x\",\n  \"valor\": 100,\n  \"data\": \"2026-11-22\",\n  \"categoriaId\": \"{{ _.categoria_ana_id }}\",\n  \"fonteDestinoId\": \"{{ _.cartao_ana_id }}\",\n  \"parcelas\": 3\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {
+                "type": "bearer",
+                "token": "{{ _.token_ana }}"
+            },
+            "metaSortKey": 3800,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request",
+            "afterResponseScript": "const data = insomnia.response.json();\nif (data && data.id !== undefined) {\n  insomnia.environment.set('lancamento_parcelado_id', String(data.id));\n}"
+        },
+        {
+            "_id": "req_lanc_parcelar_entrada",
+            "parentId": "fld_lanc",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/lancamentos",
+            "name": "POST Tentar parcelar entrada (400)",
+            "description": "Esperado: 400 Bad Request ('Só saídas podem ser parceladas.').",
+            "method": "POST",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"tipo\": \"entrada\",\n  \"descricao\": \"Teste inválido\",\n  \"valor\": 100,\n  \"data\": \"2026-11-22\",\n  \"categoriaId\": 1,\n  \"fonteDestinoId\": \"{{ _.cartao_ana_id }}\",\n  \"parcelas\": 2\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {
+                "type": "bearer",
+                "token": "{{ _.token_ana }}"
+            },
+            "metaSortKey": 3900,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_lanc_detalhar",
+            "parentId": "fld_lanc",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/lancamentos/{{ _.lancamento_ana_id }}",
+            "name": "GET Detalhar lançamento (200)",
+            "description": "",
+            "method": "GET",
+            "body": {},
+            "parameters": [],
+            "headers": [],
+            "authentication": {
+                "type": "bearer",
+                "token": "{{ _.token_ana }}"
+            },
+            "metaSortKey": 4000,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_lanc_editar",
+            "parentId": "fld_lanc",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/lancamentos/{{ _.lancamento_ana_id }}",
+            "name": "PUT Editar lançamento (200)",
+            "description": "",
+            "method": "PUT",
+            "body": {
+                "mimeType": "application/json",
+                "text": "{\n  \"tipo\": \"saida\",\n  \"descricao\": \"Ração atualizada\",\n  \"valor\": 135.9,\n  \"data\": \"2026-11-22\",\n  \"categoriaId\": \"{{ _.categoria_ana_id }}\",\n  \"fonteDestinoId\": \"{{ _.fonte_ana_id }}\"\n}"
+            },
+            "parameters": [],
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "authentication": {
+                "type": "bearer",
+                "token": "{{ _.token_ana }}"
+            },
+            "metaSortKey": 4100,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_lanc_excluir_um",
+            "parentId": "fld_lanc",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/lancamentos/{{ _.lancamento_ana_id }}",
+            "name": "DELETE Excluir lançamento à vista (204)",
+            "description": "",
+            "method": "DELETE",
+            "body": {},
+            "parameters": [],
+            "headers": [],
+            "authentication": {
+                "type": "bearer",
+                "token": "{{ _.token_ana }}"
+            },
+            "metaSortKey": 4200,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_lanc_excluir_todas",
+            "parentId": "fld_lanc",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/lancamentos/{{ _.lancamento_parcelado_id }}",
+            "name": "DELETE Excluir todas as parcelas (204)",
+            "description": "",
+            "method": "DELETE",
+            "body": {},
+            "parameters": [
+                {
+                    "name": "todasParcelas",
+                    "value": "true",
+                    "disabled": false
+                }
+            ],
+            "headers": [],
+            "authentication": {
+                "type": "bearer",
+                "token": "{{ _.token_ana }}"
+            },
+            "metaSortKey": 4300,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "fld_rel",
+            "parentId": "wrk_fullstack2_financas",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "name": "Relatórios e Saúde Financeira",
+            "description": "",
+            "environment": {},
+            "environmentPropertyOrder": null,
+            "metaSortKey": 4400,
+            "_type": "request_group"
+        },
+        {
+            "_id": "req_rel_categorias",
+            "parentId": "fld_rel",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/relatorios/categorias",
+            "name": "GET Relatório por categoria (200)",
+            "description": "",
+            "method": "GET",
+            "body": {},
+            "parameters": [
+                {
+                    "name": "inicio",
+                    "value": "2026-11-01",
+                    "disabled": false
+                },
+                {
+                    "name": "fim",
+                    "value": "2026-11-30",
+                    "disabled": false
+                }
+            ],
+            "headers": [],
+            "authentication": {
+                "type": "bearer",
+                "token": "{{ _.token_ana }}"
+            },
+            "metaSortKey": 4500,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_rel_fontes",
+            "parentId": "fld_rel",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/relatorios/fontes-destinos",
+            "name": "GET Relatório por fonte/destino (200)",
+            "description": "",
+            "method": "GET",
+            "body": {},
+            "parameters": [
+                {
+                    "name": "inicio",
+                    "value": "2026-11-01",
+                    "disabled": false
+                },
+                {
+                    "name": "fim",
+                    "value": "2026-11-30",
+                    "disabled": false
+                }
+            ],
+            "headers": [],
+            "authentication": {
+                "type": "bearer",
+                "token": "{{ _.token_ana }}"
+            },
+            "metaSortKey": 4600,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        },
+        {
+            "_id": "req_saude",
+            "parentId": "fld_rel",
+            "modified": 1763836620000,
+            "created": 1763836620000,
+            "url": "http://localhost:3000/api/saude-financeira",
+            "name": "GET Saúde financeira (200)",
+            "description": "",
+            "method": "GET",
+            "body": {},
+            "parameters": [],
+            "headers": [],
+            "authentication": {
+                "type": "bearer",
+                "token": "{{ _.token_ana }}"
+            },
+            "metaSortKey": 4700,
+            "isPrivate": false,
+            "settingStoreCookies": true,
+            "settingSendCookies": true,
+            "settingDisableRenderRequestBody": false,
+            "settingEncodeUrl": true,
+            "settingRebuildPath": true,
+            "settingFollowRedirects": "global",
+            "_type": "request"
+        }
+    ]
+}
