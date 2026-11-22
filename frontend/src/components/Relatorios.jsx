@@ -1,10 +1,10 @@
-import { useState } from 'react';
 import {
     Alert, Box, Button, CircularProgress, Container, Paper, Stack, Table, TableBody,
     TableCell, TableContainer, TableHead, TableRow, TextField, Typography,
 } from '@mui/material';
+import { useState } from 'react';
+import api, { extrairErroApi } from '../services/api.js';
 
-const API = `${import.meta.env?.VITE_API_URL ?? 'http://localhost:8000'}/relatorios/categorias`;
 const moeda = (v) => Number(v ?? 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const iso = (d) => d.toISOString().slice(0, 10);
 
@@ -14,14 +14,14 @@ function periodoInicial() {
 }
 
 function variacao(linha) {
-    if (linha.variacao_percentual != null) return Number(linha.variacao_percentual);
-    const ant = Number(linha.total_saidas_anterior ?? 0);
-    return ant === 0 ? null : ((Number(linha.total_saidas) - ant) / ant) * 100;
+    if (linha.variacaoPercentual != null) return Number(linha.variacaoPercentual);
+    const ant = Number(linha.totalAnterior ?? 0);
+    return ant === 0 ? null : ((Number(linha.total) - ant) / ant) * 100;
 }
 
 function Variacao({ valor }) {
     if (valor == null) return <Typography variant="body2" color="text.secondary">—</Typography>;
-   
+
     const cor = valor > 0 ? 'error.main' : valor < 0 ? 'success.main' : 'text.secondary';
     return (
         <Typography variant="body2" sx={{ color: cor }}>
@@ -57,24 +57,19 @@ export default function Relatorios() {
         setCarregando(true);
         setErro('');
         try {
-            const res = await fetch(`${API}?${new URLSearchParams(periodo)}`);
-            if (!res.ok) {
-                const body = await res.json().catch(() => ({}));
-                throw new Error(body.detail ?? body.message ?? `Erro inesperado (${res.status}).`);
-            }
-            const json = await res.json();
-            // Aceita tanto uma lista quanto { categorias: [...] }.
-            setDados([...(json.categorias ?? json)].sort((a, b) => b.total_saidas - a.total_saidas));
+            const { data } = await api.get('/relatorios/categorias', { params: periodo });
+            const lista = data.saidas?.categorias ?? [];
+            setDados([...lista].sort((a, b) => b.total - a.total));
         } catch (err) {
             setDados(null);
-            setErro(err.message);
+            setErro(extrairErroApi(err).mensagem);
         } finally {
             setCarregando(false);
         }
     };
 
     const maximo = dados
-        ? Math.max(0, ...dados.map((d) => Math.max(Number(d.total_saidas), Number(d.total_saidas_anterior ?? 0))))
+        ? Math.max(0, ...dados.map((d) => Math.max(Number(d.total), Number(d.totalAnterior ?? 0))))
         : 0;
 
     return (
@@ -116,11 +111,11 @@ export default function Relatorios() {
                             </TableHead>
                             <TableBody>
                                 {dados.map((d) => (
-                                    <TableRow key={d.categoria_id ?? d.categoria} hover>
-                                        <TableCell>{d.categoria}</TableCell>
-                                        <TableCell align="right">{moeda(d.total_saidas)}</TableCell>
+                                    <TableRow key={d.categoriaId ?? d.nome} hover>
+                                        <TableCell>{d.nome}</TableCell>
+                                        <TableCell align="right">{moeda(d.total)}</TableCell>
                                         <TableCell align="right">{Number(d.percentual ?? 0).toFixed(1).replace('.', ',')}%</TableCell>
-                                        <TableCell align="right">{moeda(d.total_saidas_anterior)}</TableCell>
+                                        <TableCell align="right">{moeda(d.totalAnterior)}</TableCell>
                                         <TableCell align="right"><Variacao valor={variacao(d)} /></TableCell>
                                     </TableRow>
                                 ))}
@@ -138,10 +133,10 @@ export default function Relatorios() {
                             </Typography>
                         </Stack>
                         {dados.map((d) => (
-                            <Box key={d.categoria_id ?? d.categoria} sx={{ mb: 2 }}>
-                                <Typography variant="body2" sx={{ mb: 0.5 }}>{d.categoria}</Typography>
-                                <Barra valor={d.total_saidas} maximo={maximo} cor="primary.main" />
-                                <Barra valor={d.total_saidas_anterior} maximo={maximo} cor="grey.500" />
+                            <Box key={d.categoriaId ?? d.nome} sx={{ mb: 2 }}>
+                                <Typography variant="body2" sx={{ mb: 0.5 }}>{d.nome}</Typography>
+                                <Barra valor={d.total} maximo={maximo} cor="primary.main" />
+                                <Barra valor={d.totalAnterior} maximo={maximo} cor="grey.500" />
                             </Box>
                         ))}
                     </Paper>

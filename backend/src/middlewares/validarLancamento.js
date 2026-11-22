@@ -4,6 +4,7 @@ import { ErroHttp } from './erros.js';
 const OBRIGATORIO = 'Campo obrigatório.';
 
 const erroDeTipo = (mensagem) => (problema) => (problema.input === undefined ? OBRIGATORIO : mensagem);
+const vazioViraNada = (valor) => (valor === null || (typeof valor === 'string' && valor.trim() === '') ? undefined : valor);
 const inteiroDeTexto = (valor) => (typeof valor === 'string' && /^\d+$/.test(valor.trim()) ? Number(valor) : valor);
 const decimalDeTexto = (valor) => (typeof valor === 'string' && /^\d+(\.\d{1,2})?$/.test(valor.trim()) ? Number(valor) : valor);
 
@@ -41,7 +42,7 @@ export const esquemaLancamento = z
         fonteDestinoId: idDoBanco,
         parcelas: z
             .preprocess(
-                inteiroDeTexto,
+                (valor) => inteiroDeTexto(vazioViraNada(valor)),
                 z
                     .number({ error: erroDeTipo('Informe um número inteiro.') })
                     .int('Informe um número inteiro.')

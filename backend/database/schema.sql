@@ -51,6 +51,7 @@ CREATE TABLE lancamentos (
   criado_em           TIMESTAMP      NOT NULL DEFAULT NOW(),
   CHECK (parcela_atual BETWEEN 1 AND total_parcelas),
   CHECK (total_parcelas = 1 OR grupo_parcelamento IS NOT NULL),
+  UNIQUE (grupo_parcelamento, parcela_atual),
   FOREIGN KEY (categoria_id, usuario_id, tipo) REFERENCES categorias (id, usuario_id, tipo),
   FOREIGN KEY (fonte_destino_id, usuario_id) REFERENCES fontes_destinos (id, usuario_id)
 );

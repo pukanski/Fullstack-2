@@ -1,48 +1,35 @@
-import { useCallback, useEffect, useState } from 'react';
+import { Add, Delete, Edit } from '@mui/icons-material';
 import {
     Alert, Box, Button, CircularProgress, Container, Dialog, DialogActions, DialogContent,
     DialogContentText, DialogTitle, IconButton, MenuItem, Paper, Stack, Table, TableBody,
     TableCell, TableContainer, TableHead, TableRow, TextField, Typography,
 } from '@mui/material';
-import { Add, Delete, Edit } from '@mui/icons-material';
+import { useCallback, useEffect, useState } from 'react';
+import api, { extrairErroApi } from '../services/api.js';
 
-const API = `${import.meta.env?.VITE_API_URL ?? 'http://localhost:8000'}/fontes-destinos`;
 const CARTAO = 'cartao_credito';
-// Ajuste os valores conforme o enum do back-end.
 const TIPOS = [
-    { valor: 'conta_corrente', rotulo: 'Conta corrente' },
-    { valor: 'poupanca', rotulo: 'Poupança' },
-    { valor: 'dinheiro', rotulo: 'Dinheiro' },
+    { valor: 'renda', rotulo: 'Renda' },
+    { valor: 'conta', rotulo: 'Conta' },
     { valor: CARTAO, rotulo: 'Cartão de crédito' },
-    { valor: 'outro', rotulo: 'Outro' },
 ];
 const CAMPOS_CARTAO = [
-    ['dia_fechamento', 'Dia de fechamento', { min: 1, max: 31 }],
-    ['dia_vencimento', 'Dia de vencimento', { min: 1, max: 31 }],
-    ['limite', 'Limite (R$)', { min: 0, step: '0.01' }],
+    ['diaFechamento', 'Dia de fechamento', { min: 1, max: 31 }],
+    ['diaVencimento', 'Dia de vencimento', { min: 1, max: 31 }],
+    ['limite', 'Limite (R$)', { min: 0.01, step: '0.01' }],
 ];
-const VAZIO = { nome: '', tipo: '', dia_fechamento: '', dia_vencimento: '', limite: '' };
+const VAZIO = { nome: '', tipo: '', diaFechamento: '', diaVencimento: '', limite: '' };
 const moeda = (v) => Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-const diaValido = (v) => v !== '' && Number.isInteger(Number(v)) && v >= 1 && v <= 31;
-
-async function request(url, options = {}) {
-    const res = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...options });
-    if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        const msg = body.detail ?? body.message ?? body.mensagem;
-        throw new Error(typeof msg === 'string' ? msg : `Erro inesperado (${res.status}).`);
-    }
-    return res.status === 204 ? null : res.json();
-}
+const diaValido = (v) => v !== '' && Number.isInteger(Number(v)) && Number(v) >= 1 && Number(v) <= 31;
 
 function validar(f) {
     const e = {};
     if (!f.nome.trim()) e.nome = 'Informe o nome.';
     if (!f.tipo) e.tipo = 'Selecione o tipo.';
     if (f.tipo === CARTAO) {
-        if (!diaValido(f.dia_fechamento)) e.dia_fechamento = 'Informe um dia entre 1 e 31.';
-        if (!diaValido(f.dia_vencimento)) e.dia_vencimento = 'Informe um dia entre 1 e 31.';
-        if (f.limite === '' || f.limite < 0) e.limite = 'Informe um limite válido.';
+        if (!diaValido(f.diaFechamento)) e.diaFechamento = 'Informe um dia entre 1 e 31.';
+        if (!diaValido(f.diaVencimento)) e.diaVencimento = 'Informe um dia entre 1 e 31.';
+        if (f.limite === '' || Number(f.limite) <= 0) e.limite = 'O limite deve ser maior que zero.';
     }
     return e;
 }
@@ -51,7 +38,7 @@ export default function FontesDestinos() {
     const [itens, setItens] = useState([]);
     const [carregando, setCarregando] = useState(true);
     const [erroPagina, setErroPagina] = useState('');
-    const [modo, setModo] = useState(null); // 'form' | 'excluir'
+    const [modo, setModo] = useState(null);
     const [alvo, setAlvo] = useState(null);
     const [form, setForm] = useState(VAZIO);
     const [erros, setErros] = useState({});
@@ -61,18 +48,29 @@ export default function FontesDestinos() {
     const carregar = useCallback(async () => {
         setCarregando(true);
         setErroPagina('');
-        try { setItens(await request(API)); }
-        catch (e) { setErroPagina(e.message); }
-        finally { setCarregando(false); }
+        try {
+            const { data } = await api.get('/fontes-destinos');
+            setItens(data);
+        } catch (e) {
+            setErroPagina(extrairErroApi(e).mensagem);
+        } finally {
+            setCarregando(false);
+        }
     }, []);
 
     useEffect(() => { carregar(); }, [carregar]);
 
     const abrir = (novoModo, item = null) => {
-        setModo(novoModo); setAlvo(item); setErros({}); setErro('');
+        setModo(novoModo);
+        setAlvo(item);
+        setErros({});
+        setErro('');
         setForm(item ? {
-            nome: item.nome, tipo: item.tipo, dia_fechamento: item.dia_fechamento ?? '',
-            dia_vencimento: item.dia_vencimento ?? '', limite: item.limite ?? '',
+            nome: item.nome,
+            tipo: item.tipo,
+            diaFechamento: item.diaFechamento ?? '',
+            diaVencimento: item.diaVencimento ?? '',
+            limite: item.limite ?? '',
         } : VAZIO);
     };
     const fechar = () => !ocupado && setModo(null);
@@ -84,26 +82,35 @@ export default function FontesDestinos() {
     const executar = async (acao) => {
         setOcupado(true);
         setErro('');
-        try { await acao(); setModo(null); await carregar(); }
-        catch (e) { setErro(e.message); }
-        finally { setOcupado(false); }
+        try {
+            await acao();
+            setModo(null);
+            await carregar();
+        } catch (e) {
+            const { mensagem, campos } = extrairErroApi(e);
+            setErros(campos);
+            setErro(mensagem);
+        } finally {
+            setOcupado(false);
+        }
     };
 
     const enviar = (e) => {
         e.preventDefault();
-        if (modo === 'excluir') return executar(() => request(`${API}/${alvo.id}`, { method: 'DELETE' }));
+        if (modo === 'excluir') return executar(() => api.delete(`/fontes-destinos/${alvo.id}`));
         const invalidos = validar(form);
         setErros(invalidos);
         if (Object.keys(invalidos).length) return undefined;
         const cartao = form.tipo === CARTAO;
-        const num = (v) => (cartao ? Number(v) : null); 
-        return executar(() => request(alvo ? `${API}/${alvo.id}` : API, {
-            method: alvo ? 'PUT' : 'POST',
-            body: JSON.stringify({
-                nome: form.nome.trim(), tipo: form.tipo, dia_fechamento: num(form.dia_fechamento),
-                dia_vencimento: num(form.dia_vencimento), limite: num(form.limite),
-            }),
-        }));
+        const num = (v) => (cartao ? Number(v) : null);
+        const payload = {
+            nome: form.nome.trim(),
+            tipo: form.tipo,
+            diaFechamento: num(form.diaFechamento),
+            diaVencimento: num(form.diaVencimento),
+            limite: num(form.limite),
+        };
+        return executar(() => (alvo ? api.put(`/fontes-destinos/${alvo.id}`, payload) : api.post('/fontes-destinos', payload)));
     };
 
     const campo = (nome, label, extra = {}) => (
@@ -149,8 +156,8 @@ export default function FontesDestinos() {
                                     <TableRow key={i.id} hover>
                                         <TableCell>{i.nome}</TableCell>
                                         <TableCell>{TIPOS.find((t) => t.valor === i.tipo)?.rotulo ?? i.tipo}</TableCell>
-                                        <TableCell align="right">{c ? `Dia ${i.dia_fechamento}` : '—'}</TableCell>
-                                        <TableCell align="right">{c ? `Dia ${i.dia_vencimento}` : '—'}</TableCell>
+                                        <TableCell align="right">{c ? `Dia ${i.diaFechamento}` : '—'}</TableCell>
+                                        <TableCell align="right">{c ? `Dia ${i.diaVencimento}` : '—'}</TableCell>
                                         <TableCell align="right">{c ? moeda(i.limite) : '—'}</TableCell>
                                         <TableCell align="right">
                                             <IconButton aria-label={`Editar ${i.nome}`} onClick={() => abrir('form', i)}><Edit /></IconButton>
@@ -178,9 +185,12 @@ export default function FontesDestinos() {
                         ) : (
                             <Stack spacing={2} sx={{ mt: 1 }}>
                                 {campo('nome', 'Nome', { autoFocus: true })}
-                                {campo('tipo', 'Tipo', { select: true, children: TIPOS.map((t) => (
-                                    <MenuItem key={t.valor} value={t.valor}>{t.rotulo}</MenuItem>
-                                )) })}
+                                {campo('tipo', 'Tipo', {
+                                    select: true,
+                                    children: TIPOS.map((t) => (
+                                        <MenuItem key={t.valor} value={t.valor}>{t.rotulo}</MenuItem>
+                                    )),
+                                })}
                                 {form.tipo === CARTAO && CAMPOS_CARTAO.map(([nome, label, attrs]) => (
                                     <Box key={nome}>{campo(nome, label, { type: 'number', inputProps: attrs })}</Box>
                                 ))}

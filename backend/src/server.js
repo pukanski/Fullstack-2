@@ -3,11 +3,11 @@ import express from 'express';
 import { corsRestrito } from './middlewares/cors.js';
 import { rotaNaoEncontrada, tratarErros } from './middlewares/erros.js';
 import authRouter from './routes/auth.routes.js';
+import categoriasRouter from './routes/categoria.routes.js';
+import fontesDestinosRouter from './routes/fonteDestinos.routes.js';
 import lancamentosRouter from './routes/lancamentos.routes.js';
+import relatoriosRouter from './routes/relatorio.routes.js';
 import saudeFinanceiraRouter from './routes/saudeFinanceira.routes.js';
-import categoriasRouter from './routes/categorias.routes.js';
-import fontesDestinosRouter from './routes/fontesDestinos.routes.js';
-import relatoriosRouter from './routes/relatorios.routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;

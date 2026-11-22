@@ -10,6 +10,7 @@ import { validarLogin } from '../middlewares/validarLogin.js';
 import { buscarConflitos, buscarPorEmail, buscarPorId, criarUsuarioComPadroes } from '../models/usuario.js';
 
 const router = Router();
+const HASH_FALSO = '$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy';
 
 //POST /api/auth/cadastro
 router.post('/cadastro', validarCadastro, async (req, res) => {

@@ -70,6 +70,9 @@ export function analisarSaudeFinanceira(lancamentos, mesAtual) {
 
     const saidasDaJanela = naJanela.filter((item) => item.tipo === 'saida');
     const rendaMedia = Math.round(entradasDaJanela / mesesComDados);
+    if (rendaMedia === 0) {
+        return { dadosSuficientes: false, motivo: 'sem-entradas', referencia };
+    }
     const saidasAVistaMedia = Math.round(somar(saidasDaJanela.filter((item) => !item.ehCartao)) / mesesComDados);
     const faturaDoMes = (mes) => somar(itens.filter((item) => item.ehCartao && item.mes === mes));
 

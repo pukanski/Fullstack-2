@@ -121,3 +121,64 @@ export async function lancamentosParaAnalise(usuarioId, mesAtual) {
     );
     return rows;
 }
+
+export async function buscarLancamentoPorId(usuarioId, id) {
+    const { rows } = await pool.query(
+        `SELECT ${COLUNAS_LISTAGEM}
+         FROM lancamentos l
+         JOIN categorias c ON c.id = l.categoria_id
+         JOIN fontes_destinos f ON f.id = l.fonte_destino_id
+         WHERE l.id = $1 AND l.usuario_id = $2`,
+        [id, usuarioId],
+    );
+    return rows[0] ?? null;
+}
+
+export async function atualizarLancamento(usuarioId, id, dados) {
+    const { rows } = await pool.query(
+        `UPDATE lancamentos
+         SET tipo = $3,
+             descricao = $4,
+             valor = $5,
+             data = $6,
+             categoria_id = $7,
+             fonte_destino_id = $8
+         WHERE id = $1 AND usuario_id = $2
+         RETURNING ${COLUNAS_LANCAMENTO}`,
+        [
+            id,
+            usuarioId,
+            dados.tipo,
+            dados.descricao,
+            dados.valor,
+            dados.data,
+            dados.categoriaId,
+            dados.fonteDestinoId,
+        ],
+    );
+    return rows[0] ?? null;
+}
+
+export async function excluirLancamento(usuarioId, id, todasParcelas = false) {
+    if (todasParcelas) {
+        const { rows } = await pool.query(
+            'SELECT grupo_parcelamento FROM lancamentos WHERE id = $1 AND usuario_id = $2',
+            [id, usuarioId],
+        );
+        if (rows.length === 0) return false;
+
+        if (rows[0].grupo_parcelamento) {
+            const { rowCount } = await pool.query(
+                'DELETE FROM lancamentos WHERE usuario_id = $1 AND grupo_parcelamento = $2',
+                [usuarioId, rows[0].grupo_parcelamento],
+            );
+            return rowCount > 0;
+        }
+    }
+
+    const { rowCount } = await pool.query(
+        'DELETE FROM lancamentos WHERE id = $1 AND usuario_id = $2',
+        [id, usuarioId],
+    );
+    return rowCount > 0;
+}
