@@ -5,6 +5,9 @@ import { rotaNaoEncontrada, tratarErros } from './middlewares/erros.js';
 import authRouter from './routes/auth.routes.js';
 import lancamentosRouter from './routes/lancamentos.routes.js';
 import saudeFinanceiraRouter from './routes/saudeFinanceira.routes.js';
+import categoriasRouter from './routes/categorias.routes.js';
+import fontesDestinosRouter from './routes/fontesDestinos.routes.js';
+import relatoriosRouter from './routes/relatorios.routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -20,6 +23,9 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRouter);
 app.use('/api/lancamentos', lancamentosRouter);
 app.use('/api/saude-financeira', saudeFinanceiraRouter);
+app.use('/api/categorias', categoriasRouter);
+app.use('/api/fontes-destinos', fontesDestinosRouter);
+app.use('/api/relatorios', relatoriosRouter);
 
 app.use(rotaNaoEncontrada);
 app.use(tratarErros);
