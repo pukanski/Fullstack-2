@@ -45,3 +45,11 @@ export function numeroParaValor(numero) {
     }
     return DECIMAL.format(valor);
 }
+
+export function formatarPercentual(valor) {
+    const numero = Number(valor);
+    if (valor === null || valor === undefined || valor === '' || !Number.isFinite(numero)) {
+        return '';
+    }
+    return `${numero.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
+}

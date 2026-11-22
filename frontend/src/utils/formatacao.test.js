@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { formatarData, formatarMoeda, mascararValor, numeroParaValor, valorParaNumero } from './formatacao.js';
+import { formatarData, formatarMoeda, formatarPercentual, mascararValor, numeroParaValor, valorParaNumero } from './formatacao.js';
 
 const semEspacoFixo = (texto) => texto.replace(/\u00a0/g, ' ');
 
@@ -47,4 +47,11 @@ test('conversão entre o campo de valor e o número enviado para a API', () => {
     assert.equal(numeroParaValor(1500), '1.500,00');
     assert.equal(numeroParaValor(null), '');
     assert.equal(numeroParaValor(0), '');
+});
+
+test('percentual no formato brasileiro', () => {
+    assert.equal(formatarPercentual(35.24), '35,2%');
+    assert.equal(formatarPercentual(100), '100,0%');
+    assert.equal(formatarPercentual(0), '0,0%');
+    assert.equal(formatarPercentual(null), '');
 });
