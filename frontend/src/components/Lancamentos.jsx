@@ -1,17 +1,19 @@
 import { Add, Delete, Edit, Visibility } from '@mui/icons-material';
 import {
-    Alert, Box, Button, Checkbox, CircularProgress, Container, Dialog, DialogActions,
-    DialogContent, DialogContentText, DialogTitle, FormControlLabel, IconButton, MenuItem,
+    Alert, Box, Button, Checkbox, Chip, CircularProgress, Container, Dialog, DialogActions,
+    DialogContent, DialogContentText, DialogTitle, FormControlLabel, IconButton, LinearProgress, MenuItem,
     Pagination, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead,
     TableRow, TextField, Typography,
 } from '@mui/material';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import api, { extrairErroApi } from '../services/api.js';
+import { hojeISO } from '../utils/datas.js';
+import { formatarData, formatarMoeda } from '../utils/formatacao.js';
+import { errosDoPeriodo, filtrosDoMes, parametrosDaBusca, rotuloDaParcela } from '../utils/lancamentos.js';
+import FiltrosLancamentos from './FiltrosLancamentos.jsx';
+import TotaisLancamentos from './TotaisLancamentos.jsx';
 
-const moeda = (v) => Number(v ?? 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const dia = (d) => String(d).slice(0, 10);
-const dataBr = (d) => dia(d).split('-').reverse().join('/');
-const hojeISO = () => new Date().toLocaleDateString('en-CA');
 const SEM_ERRO = { msg: '', campos: {} };
 
 const FORM_INICIAL = () => ({
@@ -27,28 +29,39 @@ const FORM_INICIAL = () => ({
 export default function Lancamentos() {
     const [dados, setDados] = useState(null);
     const [opcoes, setOpcoes] = useState({ categorias: [], fontes: [] });
+    const [filtros, setFiltros] = useState(() => filtrosDoMes());
     const [pagina, setPagina] = useState(1);
     const [carregando, setCarregando] = useState(true);
     const [erroPagina, setErroPagina] = useState('');
-    const [dialogo, setDialogo] = useState(null); // { modo: 'criar' | 'ver' | 'editar' | 'excluir', item }
+    const [dialogo, setDialogo] = useState(null);
     const [form, setForm] = useState(FORM_INICIAL);
     const [todasParcelas, setTodasParcelas] = useState(false);
     const [erro, setErro] = useState(SEM_ERRO);
     const [ocupado, setOcupado] = useState(false);
+    const ultimaBusca = useRef(0);
     const { modo, item } = dialogo ?? {};
 
+    const errosDosFiltros = errosDoPeriodo(filtros);
+    const periodoValido = Object.keys(errosDosFiltros).length === 0;
+
     const carregar = useCallback(async () => {
+        if (!periodoValido) return;
+        const numero = ultimaBusca.current + 1;
+        ultimaBusca.current = numero;
         setCarregando(true);
         setErroPagina('');
         try {
-            const { data } = await api.get('/lancamentos', { params: { pagina } });
-            setDados(data);
+            const { data } = await api.get('/lancamentos', { params: parametrosDaBusca({ ...filtros, pagina }) });
+            if (numero === ultimaBusca.current) setDados(data);
         } catch (e) {
-            setErroPagina(extrairErroApi(e).mensagem);
+            if (numero === ultimaBusca.current) {
+                setDados(null);
+                setErroPagina(extrairErroApi(e, 'Não foi possível carregar os lançamentos.').mensagem);
+            }
         } finally {
-            setCarregando(false);
+            if (numero === ultimaBusca.current) setCarregando(false);
         }
-    }, [pagina]);
+    }, [filtros, pagina, periodoValido]);
 
     useEffect(() => { carregar(); }, [carregar]);
 
@@ -57,6 +70,11 @@ export default function Lancamentos() {
             .then(([cat, fon]) => setOpcoes({ categorias: cat.data, fontes: fon.data }))
             .catch((e) => setErroPagina(extrairErroApi(e).mensagem));
     }, []);
+
+    const alterarFiltros = (novos) => {
+        setFiltros(novos);
+        setPagina(1);
+    };
 
     const abrir = (novoModo, l = null) => {
         setDialogo({ modo: novoModo, item: l });
@@ -144,59 +162,116 @@ export default function Lancamentos() {
         excluir: 'Excluir lançamento',
     };
 
+    const totalItens = dados?.paginacao?.totalItens ?? 0;
+    const totalPaginas = dados?.paginacao?.totalPaginas ?? 1;
+
     return (
-        <Container sx={{ py: 4 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Container maxWidth="lg" sx={{ py: 4 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, mb: 3 }}>
                 <Typography variant="h4" component="h1">Lançamentos</Typography>
                 <Button variant="contained" startIcon={<Add />} onClick={() => abrir('criar')}>
                     Novo lançamento
                 </Button>
             </Box>
 
-            {erroPagina && <Alert severity="error" sx={{ mb: 2 }}>{erroPagina}</Alert>}
-            {carregando && <Box sx={{ textAlign: 'center', py: 4 }}><CircularProgress /></Box>}
+            <FiltrosLancamentos
+                filtros={filtros}
+                erros={errosDosFiltros}
+                categorias={opcoes.categorias}
+                fontes={opcoes.fontes}
+                onChange={alterarFiltros}
+                onLimpar={() => alterarFiltros(filtrosDoMes())}
+            />
 
-            {dados && !carregando && (
-                <>
-                    <Typography color="text.secondary" sx={{ mb: 1 }}>
-                        Período: {dataBr(dados.periodo.inicio)} a {dataBr(dados.periodo.fim)}
+            {!periodoValido && (
+                <Alert severity="info" sx={{ mb: 2 }}>Ajuste o período para ver os lançamentos.</Alert>
+            )}
+
+            {periodoValido && erroPagina && (
+                <Alert
+                    severity="error"
+                    sx={{ mb: 2 }}
+                    action={!dados ? (
+                        <Button color="inherit" size="small" onClick={carregar} disabled={carregando}>
+                            Tentar novamente
+                        </Button>
+                    ) : undefined}
+                >
+                    {erroPagina}
+                </Alert>
+            )}
+
+            {periodoValido && carregando && !dados && (
+                <Box sx={{ textAlign: 'center', py: 6 }}><CircularProgress aria-label="Carregando lançamentos" /></Box>
+            )}
+
+            {periodoValido && dados && (
+                <Stack spacing={2}>
+                    <Typography sx={{ color: 'text.secondary' }}>
+                        {totalItens === 1 ? '1 lançamento' : `${totalItens} lançamentos`} de{' '}
+                        {formatarData(dados.periodo.inicio)} a {formatarData(dados.periodo.fim)}
                     </Typography>
-                    <TableContainer component={Paper}>
-                        <Table size="small">
-                            <TableHead>
-                                <TableRow>
-                                    {['Data', 'Descrição', 'Categoria', 'Fonte/destino', 'Valor', 'Ações'].map((t) => (
-                                        <TableCell key={t}>{t}</TableCell>
-                                    ))}
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {dados.lancamentos.length === 0 && (
+                    <TotaisLancamentos totais={dados.totais} />
+                    <Box sx={{ height: 4 }}>{carregando && <LinearProgress />}</Box>
+                    {dados.lancamentos.length === 0 ? (
+                        <Paper variant="outlined" sx={{ p: 4, textAlign: 'center' }}>
+                            <Typography sx={{ fontWeight: 600 }}>Nenhum lançamento encontrado.</Typography>
+                            <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
+                                Mude o período ou os filtros, ou clique em Novo lançamento.
+                            </Typography>
+                        </Paper>
+                    ) : (
+                        <TableContainer component={Paper} variant="outlined">
+                            <Table size="small" sx={{ minWidth: 720 }}>
+                                <TableHead>
                                     <TableRow>
-                                        <TableCell colSpan={6} align="center">Nenhum lançamento encontrado no período.</TableCell>
+                                        {['Data', 'Descrição', 'Categoria', 'Fonte/destino', 'Valor', 'Ações'].map((t) => (
+                                            <TableCell key={t} align={t === 'Valor' ? 'right' : 'left'}>{t}</TableCell>
+                                        ))}
                                     </TableRow>
-                                )}
-                                {dados.lancamentos.map((l) => (
-                                    <TableRow key={l.id} hover>
-                                        <TableCell>{dataBr(l.data)}</TableCell>
-                                        <TableCell>{l.descricao}{l.totalParcelas > 1 && ` (${l.parcelaAtual}/${l.totalParcelas})`}</TableCell>
-                                        <TableCell>{l.categoriaNome}</TableCell>
-                                        <TableCell>{l.fonteDestinoNome}</TableCell>
-                                        <TableCell sx={{ color: l.tipo === 'entrada' ? 'success.main' : 'error.main' }}>
-                                            {l.tipo === 'entrada' ? '+' : '−'} {moeda(l.valor)}
-                                        </TableCell>
-                                        <TableCell>
-                                            <IconButton aria-label="Ver" onClick={() => abrir('ver', l)}><Visibility /></IconButton>
-                                            <IconButton aria-label="Editar" onClick={() => abrir('editar', l)}><Edit /></IconButton>
-                                            <IconButton aria-label="Excluir" color="error" onClick={() => abrir('excluir', l)}><Delete /></IconButton>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                    <Pagination sx={{ mt: 2 }} count={dados.paginacao.totalPaginas} page={pagina} onChange={(_, p) => setPagina(p)} />
-                </>
+                                </TableHead>
+                                <TableBody>
+                                    {dados.lancamentos.map((l) => {
+                                        const parcela = rotuloDaParcela(l);
+                                        return (
+                                            <TableRow key={l.id} hover>
+                                                <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatarData(l.data)}</TableCell>
+                                                <TableCell>
+                                                    {l.descricao}
+                                                    {parcela && (
+                                                        <Chip label={`Parcela ${parcela}`} size="small" variant="outlined" sx={{ ml: 1 }} />
+                                                    )}
+                                                </TableCell>
+                                                <TableCell>{l.categoriaNome}</TableCell>
+                                                <TableCell>{l.fonteDestinoNome}</TableCell>
+                                                <TableCell
+                                                    align="right"
+                                                    sx={{ whiteSpace: 'nowrap', fontWeight: 600, color: l.tipo === 'entrada' ? 'success.main' : 'error.main' }}
+                                                >
+                                                    {l.tipo === 'entrada' ? '+' : '−'} {formatarMoeda(l.valor)}
+                                                </TableCell>
+                                                <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                                                    <IconButton aria-label="Ver" onClick={() => abrir('ver', l)}><Visibility /></IconButton>
+                                                    <IconButton aria-label="Editar" onClick={() => abrir('editar', l)}><Edit /></IconButton>
+                                                    <IconButton aria-label="Excluir" color="error" onClick={() => abrir('excluir', l)}><Delete /></IconButton>
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    )}
+                    {totalPaginas > 1 && (
+                        <Pagination
+                            sx={{ alignSelf: 'center' }}
+                            count={totalPaginas}
+                            page={pagina}
+                            onChange={(_, p) => setPagina(p)}
+                            disabled={carregando}
+                        />
+                    )}
+                </Stack>
             )}
 
             <Dialog open={Boolean(dialogo)} onClose={fechar} fullWidth maxWidth="sm">
@@ -207,7 +282,7 @@ export default function Lancamentos() {
                         {modo === 'excluir' ? (
                             <Stack spacing={1}>
                                 <DialogContentText>
-                                    Excluir o lançamento de {moeda(item.valor)} em {dataBr(item.data)}?
+                                    Excluir o lançamento de {formatarMoeda(item.valor)} em {formatarData(item.data)}?
                                 </DialogContentText>
                                 {item.totalParcelas > 1 && (
                                     <FormControlLabel
