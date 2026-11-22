@@ -1,9 +1,10 @@
 import {
     Alert, Box, Button, CircularProgress, Container, Paper, Stack, Table, TableBody,
-    TableCell, TableContainer, TableHead, TableRow, TextField, Typography,
+    Tab, TableCell, TableContainer, TableHead, TableRow, Tabs, TextField, Typography,
 } from '@mui/material';
 import { useState } from 'react';
 import api, { extrairErroApi } from '../services/api.js';
+import RelatorioFontesDestinos from './RelatorioFontesDestinos.jsx';
 
 const moeda = (v) => Number(v ?? 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const iso = (d) => d.toISOString().slice(0, 10);
@@ -42,7 +43,7 @@ function Barra({ valor, maximo, cor }) {
     );
 }
 
-export default function Relatorios() {
+function RelatorioCategorias() {
     const [periodo, setPeriodo] = useState(periodoInicial);
     const [dados, setDados] = useState(null);
     const [carregando, setCarregando] = useState(false);
@@ -73,8 +74,7 @@ export default function Relatorios() {
         : 0;
 
     return (
-        <Container sx={{ py: 4 }}>
-            <Typography variant="h4" component="h1" sx={{ mb: 3 }}>Relatórios</Typography>
+        <>
             <Typography variant="h6" component="h2" sx={{ mb: 2 }}>Saídas por categoria</Typography>
 
             <Paper component="form" onSubmit={gerar} sx={{ p: 2, mb: 3 }}>
@@ -142,6 +142,21 @@ export default function Relatorios() {
                     </Paper>
                 </>
             )}
+        </>
+    );
+}
+
+export default function Relatorios() {
+    const [aba, setAba] = useState('categorias');
+
+    return (
+        <Container sx={{ py: 4 }}>
+            <Typography variant="h4" component="h1" sx={{ mb: 2 }}>Relatórios</Typography>
+            <Tabs value={aba} onChange={(_, nova) => setAba(nova)} sx={{ mb: 3, borderBottom: 1, borderColor: 'divider' }}>
+                <Tab value="categorias" label="Por categoria" />
+                <Tab value="fontes" label="Por fonte e destino" />
+            </Tabs>
+            {aba === 'categorias' ? <RelatorioCategorias /> : <RelatorioFontesDestinos />}
         </Container>
     );
 }
